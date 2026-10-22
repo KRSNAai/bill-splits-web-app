@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Split – bill splitter</title>
+<meta name="description" content="Split a bill item by item, equally or by percentage, and see who pays whom.">
+<style>
+:root{--bg:#F5EFE6;--card:#FFFFFF;--ink:#2F261E;--mute:#8C7B6B;--line:#EADFD0;--accent:#3B2F26;--on:#FFFFFF;--chip:#F1E8DB;--ease:cubic-bezier(.32,.72,0,1);--spring:cubic-bezier(.34,1.56,.64,1);
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1E1913;--card:#2A231C;--ink:#F3EBDD;--mute:#A39482;--line:#3A3128;--accent:#E9DCC6;--on:#1E1913;--chip:#352C23}}
+:root[data-theme="dark"]{--bg:#1E1913;--card:#2A231C;--ink:#F3EBDD;--mute:#A39482;--line:#3A3128;--accent:#E9DCC6;--on:#1E1913;--chip:#352C23}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Rounded","Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+main{max-width:520px;margin:0 auto;padding:28px 18px 60px}
+h1{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin:0 0 18px;font-weight:600}
+h2{font-size:13px;color:var(--mute);margin:0 0 10px;font-weight:600}
+.card{background:var(--card);border-radius:26px;padding:20px;box-shadow:0 1px 2px rgba(60,40,20,.05),0 12px 32px -14px rgba(60,40,20,.18);margin-bottom:14px;animation:rise .8s var(--ease) both}
+@keyframes rise{from{opacity:0;transform:translateY(18px) scale(.985)}}
+input,select{font:inherit;color:inherit;background:transparent;border:0;outline:0;width:100%;min-width:0}
+.title{font-size:22px;font-weight:650;letter-spacing:-.02em}
+.line{display:flex;gap:10px;align-items:center;margin-bottom:10px}
+.inp{background:var(--chip);border-radius:12px;padding:10px 12px;font-size:16px;flex:1}
+.price,.pc{display:flex;align-items:center;gap:4px;background:var(--chip);border-radius:12px;padding:0 12px;flex:none;color:var(--mute)}
+.price{width:124px}.pc{width:96px}
+.price input,.pc input{padding:10px 0;font-weight:600;color:var(--ink)}
+select{background:var(--chip);border-radius:12px;padding:9px 10px;width:auto;flex:1}
+.item{border-top:1px solid var(--line);padding:16px 0;animation:rise .7s var(--ease) both}
+.item:first-child{border-top:0;padding-top:4px}
+.lbl{font-size:13px;color:var(--mute)}
+.seg{display:flex;background:var(--chip);border-radius:12px;padding:3px;margin:4px 0 10px}
+.seg button{flex:1;border:0;background:transparent;color:var(--mute);font:inherit;font-size:14px;font-weight:600;padding:8px;border-radius:9px;cursor:pointer;transition:all .45s var(--ease)}
+.seg button.on{background:var(--card);color:var(--ink);box-shadow:0 1px 4px rgba(60,40,20,.12)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.chip{border:0;background:var(--chip);color:var(--mute);padding:8px 14px;border-radius:999px;font:inherit;font-size:14px;font-weight:600;cursor:pointer;transition:transform .4s var(--spring),background .4s var(--ease),color .4s var(--ease)}
+.chip.on{background:var(--accent);color:var(--on)}
+.pr{display:flex;align-items:center;gap:10px;margin:6px 0}.pr span:first-child{flex:1}
+.warn{font-size:12px;color:#C0623B;margin-top:4px}.ok{font-size:12px;color:var(--mute);margin-top:4px}
+.ic{border:0;background:var(--chip);color:var(--mute);width:30px;height:30px;border-radius:50%;font-size:16px;cursor:pointer;flex:none;transition:transform .4s var(--spring)}
+.btn{width:100%;border:0;border-radius:16px;padding:14px;font:inherit;font-weight:600;background:var(--accent);color:var(--on);cursor:pointer;margin-top:10px;transition:transform .4s var(--spring)}
+.btn.ghost{background:var(--chip);color:var(--ink)}
+.chip:active,.ic:active,.btn:active{transform:scale(.93)}
+.hero{text-align:center;padding:24px 20px}
+.big{font-size:46px;font-weight:700;letter-spacing:-.04em;font-variant-numeric:tabular-nums}
+.sub{color:var(--mute);font-size:14px}
+.res{display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid var(--line)}
+.res:first-child{border-top:0}
+.res .mid{flex:1;min-width:0}.res b{font-size:16px}
+.amt{font-size:17px;font-weight:650;font-variant-numeric:tabular-nums;white-space:nowrap;text-align:right}
+.settle{background:var(--chip);border-radius:16px;padding:6px 14px;margin-top:10px;font-size:15px}
+.settle div{padding:9px 0;border-top:1px solid var(--line)}.settle div:first-child{border-top:0}
+.bk{margin:12px 0}.bk .t{display:flex;justify-content:space-between;gap:10px;font-size:15px}.bk .t span:last-child{font-variant-numeric:tabular-nums;color:var(--mute)}.bar{height:8px;border-radius:99px;background:var(--chip);margin-top:6px;overflow:hidden}.bar i{display:block;height:100%;width:0;background:var(--accent);border-radius:99px;transition:width .7s var(--ease)}
+.hint{font-size:12px;color:var(--mute);text-align:center;margin-top:10px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<main>
+<h1>Split</h1>
+<section class="card"><input class="title" id="title" placeholder="What’s the bill for?" maxlength="40"></section>
+<section class="card"><h2>People</h2><div id="people"></div><button class="btn ghost" id="addP">+ Add person</button></section>
+<section class="card"><h2>Items</h2><div id="items"></div><button class="btn ghost" id="addI">+ Add item</button><div class="hint">Each item has its own price, payer and split</div></section>
+<section class="card hero"><div class="sub">Total bill</div><div class="big" id="total">₹0.00</div></section>
+<section class="card"><h2>Share of the total</h2><div id="brk"></div><div class="ok" id="brkT"></div></section>
+<section class="card"><h2>Each person’s share</h2><div id="res"></div><h2 style="margin-top:18px">Settle up</h2><div class="settle" id="settle"></div></section>
+<section class="card"><button class="btn" id="share">Copy share link</button><button class="btn ghost" id="new">Start a new bill</button><div class="hint" id="msg">Saved on this device. Anyone who opens your link gets their own copy.</div></section>
+</main>
+<script>
+var $=function(s){return document.querySelector(s)};
+var uid=function(){return Math.random().toString(36).slice(2,8)};
+function h(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e}
+var fmt=new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',minimumFractionDigits:2});
+var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+function newItem(p){return{id:uid(),name:'',price:0,payer:p,mode:'eq',who:null,pct:{}}}
+function fresh(){var a=uid();return{title:'',people:[{id:a,name:'You'},{id:uid(),name:'Friend'}],items:[newItem(a)]}}
+var S=fresh(),res={},known={},itemLbl={},brk={},timer=null;
+
+function tween(el,to){
+  var from=el._v==null?0:el._v;el._v=to;
+  if(reduce||from===to){el.textContent=fmt.format(to);return}
+  var t0=performance.now();cancelAnimationFrame(el._r);
+  (function step(t){var p=Math.min(1,(t-t0)/600),e=1-Math.pow(1-p,4);
+    el.textContent=fmt.format(from+(to-from)*e);if(p<1)el._r=requestAnimationFrame(step)})(t0);
+}
+function nm(id){var p=S.people.filter(function(x){return x.id===id})[0];return(p&&p.name.trim())||'Someone'}
+function save(){clearTimeout(timer);timer=setTimeout(function(){try{localStorage.setItem('split.bill2',JSON.stringify(S))}catch(e){}},300)}
+
+function calc(){
+  var ids=S.people.map(function(p){return p.id}),n=ids.length,share={},paid={},total=0;
+  ids.forEach(function(i){share[i]=0;paid[i]=0});
+  S.items.forEach(function(it){
+    var c=Math.round((+it.price||0)*100);if(!c)return;total+=c;
+    if(ids.indexOf(it.payer)<0)it.payer=ids[0];
+    var w;
+    if(it.mode==='pct')w=ids.map(function(i){return Math.max(0,+it.pct[i]||0)});
+    else{var who=(it.who||[]).filter(function(i){return ids.indexOf(i)>-1});if(!it.who||!who.length)who=ids;
+      w=ids.map(function(i){return who.indexOf(i)>-1?1:0})}
+    var sw=w.reduce(function(a,b){return a+b},0);
+    if(!sw){w=ids.map(function(){return 1});sw=n}
+    var parts=w.map(function(x){return Math.floor(c*x/sw)});
+    var rem=c-parts.reduce(function(a,b){return a+b},0);
+    for(var k=0;rem>0;k=(k+1)%n){if(w[k]>0){parts[k]++;rem--}}
+    ids.forEach(function(i,k){share[i]+=parts[k]});paid[it.payer]+=c;
+  });
+  return{ids:ids,share:share,paid:paid,total:total};
+}
+function refresh(){
+  var r=calc();tween($('#total'),r.total/100);
+  S.items.forEach(function(it){var L=itemLbl[it.id];if(!L)return;var c=Math.round((+it.price||0)*100);
+    L.textContent=r.total&&c?(c*100/r.total).toFixed(1).replace(/\.0$/,'')+'% of the total bill':'Enter a price to see its share of the total';
+    var B=brk[it.id];if(B){var pc=r.total&&c?c*100/r.total:0;B.n.textContent=it.name.trim()||'Item';B.v.textContent=fmt.format(c/100)+' · '+pc.toFixed(1).replace(/\.0$/,'')+'%';B.b.style.width=pc+'%'}});
+  $('#brkT').textContent=r.total?'Total '+fmt.format(r.total/100)+' = 100%':'';
+  r.ids.forEach(function(i){
+    var R=res[i];if(!R)return;
+    R.name.textContent=nm(i);
+    tween(R.amt,r.share[i]/100);
+    R.pct.textContent=r.total?(r.share[i]*100/r.total).toFixed(1).replace(/\.0$/,'')+'% of the bill · paid '+fmt.format(r.paid[i]/100):'Paid '+fmt.format(r.paid[i]/100);
+  });
+  var cr=[],db=[];
+  r.ids.forEach(function(i){var d=r.paid[i]-r.share[i];if(d>0)cr.push([i,d]);else if(d<0)db.push([i,-d])});
+  cr.sort(function(a,b){return b[1]-a[1]});db.sort(function(a,b){return b[1]-a[1]});
+  var out=[],x=0,y=0;
+  while(x<cr.length&&y<db.length){var m=Math.min(cr[x][1],db[y][1]);out.push([db[y][0],cr[x][0],m]);cr[x][1]-=m;db[y][1]-=m;if(!cr[x][1])x++;if(!db[y][1])y++}
+  var box=$('#settle');box.innerHTML='';
+  if(!r.total)box.appendChild(h('div',null,'Add item prices to see who pays whom.'));
+  else if(!out.length)box.appendChild(h('div',null,'Everyone is settled. Nobody owes anything.'));
+  else out.forEach(function(o){box.appendChild(h('div',null,nm(o[0])+' pays '+nm(o[1])+' '+fmt.format(o[2]/100)))});
+}
+
+function buildPeople(){
+  var box=$('#people');box.innerHTML='';
+  S.people.forEach(function(p){
+    var l=h('div','line'),i=h('input','inp');i.value=p.name;i.maxLength=20;i.placeholder='Name';
+    i.oninput=function(){p.name=i.value;refresh();save()};i.onchange=function(){buildItems()};
+    var d=h('button','ic','×');d.setAttribute('aria-label','Remove');
+    d.style.visibility=S.people.length>2?'visible':'hidden';
+    d.onclick=function(){
+      S.people=S.people.filter(function(x){return x.id!==p.id});
+      S.items.forEach(function(it){if(it.who)it.who=it.who.filter(function(x){return x!==p.id});delete it.pct[p.id]});
+      buildAll();save()};
+    l.append(i,d);box.appendChild(l);
+  });
+}
+function buildRes(){
+  var box=$('#res');box.innerHTML='';res={};
+  S.people.forEach(function(p){
+    var r=h('div','res'),mid=h('div','mid'),n=h('b'),s=h('div','sub'),a=h('div','amt');
+    mid.append(n,s);r.append(mid,a);box.appendChild(r);res[p.id]={name:n,pct:s,amt:a};
+  });
+}
+function buildItems(){
+  var box=$('#items');box.innerHTML='';itemLbl={};brk={};$('#brk').innerHTML='';
+  S.items.forEach(function(it){
+    var el=h('div','item');if(known[it.id])el.style.animation='none';else known[it.id]=1;
+    var l1=h('div','line'),nmI=h('input','inp');nmI.value=it.name;nmI.placeholder='Item, e.g. Juice';nmI.maxLength=30;
+    nmI.oninput=function(){it.name=nmI.value;save()};
+    var pr=h('div','price');pr.append(h('span',null,'₹'));
+    var pI=h('input');pI.type='number';pI.inputMode='decimal';pI.min='0';pI.step='0.01';pI.placeholder='0';pI.value=it.price||'';
+    pI.oninput=function(){it.price=Math.max(0,parseFloat(pI.value)||0);refresh();save()};pr.appendChild(pI);
+    var del=h('button','ic','×');del.setAttribute('aria-label','Remove item');
+    del.onclick=function(){S.items=S.items.filter(function(x){return x.id!==it.id});buildItems();refresh();save()};
+    l1.append(nmI,pr,del);var il=h('div','ok');il.style.margin='-4px 0 10px';itemLbl[it.id]=il;var br=h('div','bk'),bt=h('div','t'),bn=h('span'),bv=h('span'),bar=h('div','bar'),bi=h('i');bt.append(bn,bv);bar.appendChild(bi);br.append(bt,bar);$('#brk').appendChild(br);brk[it.id]={n:bn,v:bv,b:bi};
+    var l2=h('div','line');l2.appendChild(h('span','lbl','Paid by'));
+    var sel=h('select');S.people.forEach(function(p){var o=h('option',null,nm(p.id));o.value=p.id;sel.appendChild(o)});
+    sel.value=it.payer;sel.onchange=function(){it.payer=sel.value;refresh();save()};l2.appendChild(sel);
+    var seg=h('div','seg'),b1=h('button',it.mode==='eq'?'on':'','Equally'),b2=h('button',it.mode==='pct'?'on':'','By percentage');
+    b1.onclick=function(){it.mode='eq';buildItems();refresh();save()};
+    b2.onclick=function(){
+      it.mode='pct';var n=S.people.length,base=Math.floor(10000/n)/100;it.pct={};
+      S.people.forEach(function(p,k){it.pct[p.id]=k===0?Math.round((100-base*(n-1))*100)/100:base});
+      buildItems();refresh();save()};
+    seg.append(b1,b2);el.append(l1,il,l2,seg);
+    if(it.mode==='eq'){
+      var ch=h('div','chips');
+      S.people.forEach(function(p){
+        var on=!it.who||it.who.indexOf(p.id)>-1,c=h('button','chip'+(on?' on':''),nm(p.id));
+        c.onclick=function(){
+          if(!it.who)it.who=S.people.map(function(x){return x.id});
+          var k=it.who.indexOf(p.id);if(k>-1)it.who.splice(k,1);else it.who.push(p.id);
+          c.classList.toggle('on',it.who.indexOf(p.id)>-1);refresh();save()};
+        ch.appendChild(c)});
+      el.append(h('div','lbl','Shared by (tap to include or remove)'),ch);
+    }else{
+      var tot=h('div','ok');
+      var upd=function(){var s=0;S.people.forEach(function(p){s+=Math.max(0,+it.pct[p.id]||0)});s=Math.round(s*100)/100;
+        tot.className=s===100?'ok':'warn';tot.textContent=s===100?'Total 100%':'Total '+s+'%. It should add up to 100%, so shares are scaled to match.'};
+      S.people.forEach(function(p){
+        var r=h('div','pr');r.appendChild(h('span',null,nm(p.id)));
+        var w=h('div','pc'),i=h('input');i.type='number';i.inputMode='decimal';i.min='0';i.step='0.01';i.value=it.pct[p.id]==null?'':it.pct[p.id];
+        i.oninput=function(){it.pct[p.id]=Math.max(0,parseFloat(i.value)||0);upd();refresh();save()};
+        w.append(i,h('span',null,'%'));r.appendChild(w);el.appendChild(r)});
+      el.appendChild(tot);upd();
+    }
+    box.appendChild(el);
+  });
+}
+function buildAll(){buildPeople();buildItems();buildRes();refresh()}
+
+function adopt(d){
+  if(!d||!Array.isArray(d.people)||d.people.length<2||!Array.isArray(d.items))return;
+  var people=d.people.slice(0,20).map(function(p){return{id:String(p.id),name:String(p.name||'').slice(0,20)}});
+  var items=d.items.slice(0,40).map(function(it){
+    var pct={};if(it.pct&&typeof it.pct==='object')Object.keys(it.pct).forEach(function(k){pct[k]=Math.max(0,+it.pct[k]||0)});
+    return{id:String(it.id||uid()),name:String(it.name||'').slice(0,30),price:Math.max(0,+it.price||0),payer:String(it.payer),mode:it.mode==='pct'?'pct':'eq',who:Array.isArray(it.who)?it.who.map(String):null,pct:pct}});
+  S={title:String(d.title||'').slice(0,40),people:people,items:items};
+  $('#title').value=S.title;buildAll();
+}
+$('#title').oninput=function(e){S.title=e.target.value;save()};
+$('#addP').onclick=function(){
+  if(S.people.length>=20)return;
+  S.people.push({id:uid(),name:'Friend '+(S.people.length)});buildAll();save();
+  var ins=document.querySelectorAll('#people input'),l=ins[ins.length-1];if(l){l.focus();l.select()}};
+$('#addI').onclick=function(){
+  if(S.items.length>=40)return;
+  S.items.push(newItem(S.people[0].id));buildItems();refresh();save();
+  var ins=document.querySelectorAll('#items .item'),l=ins[ins.length-1];if(l)l.querySelector('input').focus()};
+$('#share').onclick=function(){
+  var u=location.href.split('#')[0]+'#b='+btoa(unescape(encodeURIComponent(JSON.stringify(S))));
+  var ok=function(){$('#msg').textContent='Link copied. Anyone who opens it gets their own copy of this bill.'};
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(u).then(ok,function(){prompt('Copy this link',u)});
+  else if(navigator.share)navigator.share({title:S.title||'Bill split',url:u}).catch(function(){});
+  else prompt('Copy this link',u)};
+$('#new').onclick=function(){S=fresh();$('#title').value='';buildAll();save();$('#msg').textContent='Fresh bill started.'};
+
+buildAll();
+try{
+  var m=location.hash.match(/^#b=(.+)$/);
+  if(m){adopt(JSON.parse(decodeURIComponent(escape(atob(m[1])))));save();history.replaceState(null,'',location.pathname+location.search)}
+  else{var r=localStorage.getItem('split.bill2');if(r)adopt(JSON.parse(r))}
+}catch(e){}
+</script>
+</body>
+</html>
